@@ -1,6 +1,6 @@
 import { Auth0Provider } from '@auth0/auth0-react';
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export const AuthProvider = ({ children }: any) => {
   return (
     <Auth0Provider
       domain="dev-xrdraegerperu.us.auth0.com"
@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         audience: 'https://api.prometeo',
       }}
       cacheLocation="localstorage"
+      useRefreshTokens={true}
     >
       {children}
     </Auth0Provider>
