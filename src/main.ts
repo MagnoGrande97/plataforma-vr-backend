@@ -6,7 +6,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3000;
 
-  await app.listen(port, '0.0.0.0'); // 👈 ESTA LÍNEA ES LA CLAVE
+  await app.listen(port, '0.0.0.0');
 
   console.log('APP RUNNING ON PORT:', port);
 }

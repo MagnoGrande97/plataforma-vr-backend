@@ -16,7 +16,7 @@ export class UsuariosController {
     this.useCase = new SincronizarUsuarioUseCase(this.repo);
   }
 
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   @Get()
   async obtenerUsuarios(@UsuarioActual() usuarioToken) {
     const usuario = await this.useCase.ejecutar(usuarioToken);
