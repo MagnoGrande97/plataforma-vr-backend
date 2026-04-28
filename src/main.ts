@@ -4,11 +4,14 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const port = Number(process.env.PORT) || 10000;
+  app.enableCors({
+    origin: [
+      'https://prometeo-frontend.onrender.com',
+      'http://localhost:5173'
+    ],
+    credentials: true,
+  });
 
-  await app.listen(port, '0.0.0.0'); // 🔥 IMPORTANTE para Render
-
-  console.log('APP RUNNING ON PORT:', port);
+  await app.listen(3000);
 }
-
 bootstrap();
