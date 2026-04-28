@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
-import * as express from 'express';
+import express from 'express'; // 👈 IMPORTANTE
 
 async function bootstrap() {
   const server = express();
@@ -14,6 +14,7 @@ async function bootstrap() {
   const port = process.env.PORT || 10000;
 
   await app.init();
+
   server.listen(port, '0.0.0.0', () => {
     console.log('APP RUNNING ON PORT:', port);
   });
