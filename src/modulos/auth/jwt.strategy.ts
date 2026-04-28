@@ -9,22 +9,24 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       audience: 'https://api.prometeo',
-      issuer: 'https://dev-xrdragerperu.us.auth0.com/',
+      issuer: 'https://dev-xrdraegerperu.us.auth0.com/',
       algorithms: ['RS256'],
       secretOrKeyProvider: jwksRsa.passportJwtSecret({
         cache: true,
         rateLimit: true,
         jwksRequestsPerMinute: 5,
-        jwksUri: 'https://dev-xrdragerperu.us.auth0.com/.well-known/jwks.json',
+        jwksUri: 'https://dev-xrdraegerperu.us.auth0.com/.well-known/jwks.json',
       }),
     });
   }
 
   validate(payload: any) {
+    console.log('PAYLOAD:', payload);
+
     return {
-    usuarioId: payload.sub,
-    email: payload.email,
-    nombre: payload.name,
-  };
+      usuarioId: payload.sub,
+      email: payload.email || 'sin-email',
+      nombre: payload.name || 'sin-nombre',
+    };
   }
 }

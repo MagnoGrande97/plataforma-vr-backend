@@ -1,6 +1,10 @@
 {
   "name": "plataforma-vr-backend",
   "version": "0.0.1",
+  "scripts": {
+    "build": "nest build",
+    "start:prod": "node dist/main"
+  },
   "description": "",
   "author": "",
   "private": true,
@@ -24,9 +28,11 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
+    "@prisma/client": "^5.22.0",
     "jwks-rsa": "^4.0.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
+    "prisma": "^5.22.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },

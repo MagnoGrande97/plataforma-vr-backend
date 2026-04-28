@@ -3,7 +3,7 @@ export class Usuario {
   auth0Id: string;
   email: string;
   nombre: string;
-  institucionId?: string;
-  rol?: string;
+  institucionId?: string | null;
+  rol?: string | null;
   creadoEn: Date;
 }
