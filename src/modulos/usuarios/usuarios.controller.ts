@@ -19,6 +19,8 @@ export class UsuariosController {
   @UseGuards(JwtAuthGuard)
   @Get()
   async obtenerUsuarios(@UsuarioActual() usuarioToken) {
+    console.log('TOKEN DATA: ', usuarioToken);
+
     const usuario = await this.useCase.ejecutar(usuarioToken);
 
     return {
