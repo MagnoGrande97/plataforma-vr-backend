@@ -26,4 +26,9 @@ export class UsuariosController {
       usuario,
     };
   }
+
+  @Get('test')
+test() {
+  return { ok: true };
+}
 }
