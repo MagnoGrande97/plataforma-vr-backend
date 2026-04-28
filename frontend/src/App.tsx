@@ -13,6 +13,7 @@ function App() {
   const llamarBackend = async () => {
     try {
       const token = await getAccessTokenSilently();
+      console.log("TOKEN 👉", token);
 
       const res = await fetch(
         'https://prometeo-z6hv.onrender.com/usuarios',
