@@ -1,10 +1,6 @@
 {
   "name": "plataforma-vr-backend",
   "version": "0.0.1",
-  "scripts": {
-    "build": "nest build",
-    "start:prod": "node dist/main"
-  },
   "description": "",
   "author": "",
   "private": true,
