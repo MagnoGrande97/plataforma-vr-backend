@@ -28,7 +28,7 @@ export class UsuariosController {
   }
 
   @Get('test')
-test() {
-  return { ok: true };
-}
+  test() {
+    return { ok: true };
+  }
 }
