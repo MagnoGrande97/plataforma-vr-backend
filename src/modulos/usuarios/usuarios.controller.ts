@@ -4,11 +4,13 @@ import { Controller, Get } from '@nestjs/common';
 export class UsuariosController {
   @Get()
   obtenerUsuarios() {
-    return [
-      {
-        id: 1,
+    return {
+      mensaje: 'Usuario simulado',
+      usuario: {
+        id: '123',
+        email: 'test@test.com',
         nombre: 'Usuario Demo',
       },
-    ];
+    };
   }
 }
