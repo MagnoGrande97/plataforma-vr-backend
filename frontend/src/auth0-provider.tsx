@@ -9,6 +9,9 @@ export const AuthProvider = ({ children }: any) => {
         redirect_uri: window.location.origin,
         audience: 'https://api.prometeo',
       }}
+      onRedirectCallback={() => {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }}
       cacheLocation="localstorage"
       useRefreshTokens={true}
     >
