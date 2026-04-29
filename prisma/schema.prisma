@@ -19,5 +19,6 @@ model Usuario {
   nombre        String
   institucionId String?
   rol           String   @default("user")
+  activo        Boolean  @default(true)
   creadoEn      DateTime @default(now())
 }

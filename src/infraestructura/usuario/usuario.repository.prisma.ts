@@ -59,8 +59,9 @@ export class UsuarioRepositoryPrisma implements UsuarioRepository {
   }
 
   async eliminarPorId(id: string) {
-    return this.prisma.usuario.delete({
+    return this.prisma.usuario.update({
       where: { id },
+      data: { activo: false }, // 🔥 PASO 4
     });
   }
 }

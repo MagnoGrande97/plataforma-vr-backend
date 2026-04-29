@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Delete,
+  Query,
 } from '@nestjs/common';
 
 import { JwtAuthGuard } from '../auth/jwt/jwt-auth.guard';
@@ -48,7 +49,7 @@ export class UsuariosController {
     return this.repo.buscarPorAuth0Id(usuarioToken.sub);
   }
 
-  // 🔥 EDITAR PERFIL
+  // 🔹 EDITAR PERFIL
   @UseGuards(JwtAuthGuard)
   @Put('perfil')
   async actualizarPerfil(
@@ -70,12 +71,19 @@ export class UsuariosController {
   // 🔥 CRUD USUARIOS (ADMIN)
   // =========================
 
-  // 🔹 LISTAR TODOS
+  // 🔹 LISTAR TODOS (CON PAGINACIÓN 🔥)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Get('todos')
-  async listarUsuarios() {
-    return this.repo.listarTodos();
+  async listarUsuarios(
+    @Query('page') page = 1,
+    @Query('limit') limit = 10
+  ) {
+    return this.prisma.usuario.findMany({
+      skip: (Number(page) - 1) * Number(limit),
+      take: Number(limit),
+      orderBy: { creadoEn: 'desc' },
+    });
   }
 
   // 🔹 VER UNO
@@ -102,7 +110,7 @@ export class UsuariosController {
     return this.repo.actualizarPorId(id, body);
   }
 
-  // 🔹 ELIMINAR
+  // 🔹 ELIMINAR (soft delete en el siguiente paso)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Delete(':id')
