@@ -12,7 +12,11 @@ export class SincronizarUsuarioUseCase {
 
     const auth0Id = payload.sub;
     const email = payload.email ?? '';
-    const nombre = payload.name || payload.nickname || '';
+    const nombre =
+      payload.name ||
+      payload.nickname ||
+      payload.given_name ||
+      '';
 
     let usuario = await this.repo.buscarPorAuth0Id(auth0Id);
 

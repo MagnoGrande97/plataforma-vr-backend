@@ -18,6 +18,6 @@ model Usuario {
   email         String
   nombre        String
   institucionId String?
-  rol           String?
+  rol           String   @default("user")
   creadoEn      DateTime @default(now())
 }
