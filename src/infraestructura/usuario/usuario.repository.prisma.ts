@@ -47,21 +47,24 @@ export class UsuarioRepositoryPrisma implements UsuarioRepository {
     });
   }
 
-  async actualizarPorId(id: string, data: {
-    nombre?: string;
-    institucionId?: string;
-    rol?: string;
-  }) {
+  async actualizarPorId(
+    id: string,
+    data: {
+      nombre?: string;
+      institucionId?: string;
+      rol?: string;
+    }
+  ) {
     return this.prisma.usuario.update({
       where: { id },
       data,
     });
   }
 
+  // 🔥 FIX AQUÍ
   async eliminarPorId(id: string) {
-    return this.prisma.usuario.update({
+    return this.prisma.usuario.delete({
       where: { id },
-      data: { activo: false }, // 🔥 PASO 4
     });
   }
 }
