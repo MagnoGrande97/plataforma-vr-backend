@@ -34,4 +34,33 @@ export class UsuarioRepositoryPrisma implements UsuarioRepository {
       data,
     });
   }
+
+  async listarTodos() {
+    return this.prisma.usuario.findMany({
+      orderBy: { creadoEn: 'desc' },
+    });
+  }
+
+  async buscarPorId(id: string) {
+    return this.prisma.usuario.findUnique({
+      where: { id },
+    });
+  }
+
+  async actualizarPorId(id: string, data: {
+    nombre?: string;
+    institucionId?: string;
+    rol?: string;
+  }) {
+    return this.prisma.usuario.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async eliminarPorId(id: string) {
+    return this.prisma.usuario.delete({
+      where: { id },
+    });
+  }
 }

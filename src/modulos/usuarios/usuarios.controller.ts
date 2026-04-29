@@ -1,4 +1,14 @@
-import { Controller, Get, UseGuards, Put, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  UseGuards,
+  Put,
+  Body,
+  Param,
+  Patch,
+  Delete,
+} from '@nestjs/common';
+
 import { JwtAuthGuard } from '../auth/jwt/jwt-auth.guard';
 import { UsuarioActual } from '../../core/decoradores/usuario.decorador';
 
@@ -38,7 +48,7 @@ export class UsuariosController {
     return this.repo.buscarPorAuth0Id(usuarioToken.sub);
   }
 
-  // 🔥 EDITAR PERFIL (LO NUEVO IMPORTANTE)
+  // 🔥 EDITAR PERFIL
   @UseGuards(JwtAuthGuard)
   @Put('perfil')
   async actualizarPerfil(
@@ -48,12 +58,56 @@ export class UsuariosController {
     return this.repo.actualizarPorAuth0Id(usuarioToken.sub, body);
   }
 
-  // 🔥 ADMIN
+  // 🔥 ADMIN TEST
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Get('admin')
   adminOnly() {
     return { mensaje: 'Solo admin' };
+  }
+
+  // =========================
+  // 🔥 CRUD USUARIOS (ADMIN)
+  // =========================
+
+  // 🔹 LISTAR TODOS
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Get('todos')
+  async listarUsuarios() {
+    return this.repo.listarTodos();
+  }
+
+  // 🔹 VER UNO
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Get(':id')
+  async obtenerUsuario(@Param('id') id: string) {
+    return this.repo.buscarPorId(id);
+  }
+
+  // 🔹 ACTUALIZAR
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Patch(':id')
+  async actualizarUsuario(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      nombre?: string;
+      institucionId?: string;
+      rol?: string;
+    }
+  ) {
+    return this.repo.actualizarPorId(id, body);
+  }
+
+  // 🔹 ELIMINAR
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Delete(':id')
+  async eliminarUsuario(@Param('id') id: string) {
+    return this.repo.eliminarPorId(id);
   }
 
   // 🔹 TEST
