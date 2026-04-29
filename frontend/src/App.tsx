@@ -100,110 +100,147 @@ function App() {
   if (isLoading) return <p>Cargando...</p>;
 
   return (
-    <div style={{ padding: 20 }}>
+    <div className="min-h-screen bg-gray-100 p-6">
       {!isAuthenticated && (
-        <button onClick={() => loginWithRedirect()}>
-          Login
-        </button>
+        <div className="flex justify-center items-center h-screen">
+          <button
+            onClick={() => loginWithRedirect()}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg shadow"
+          >
+            Login
+          </button>
+        </div>
       )}
 
       {isAuthenticated && perfil && (
-        <>
-          <h3>Bienvenido {perfil.nombre}</h3>
-          <p>Email: {perfil.email}</p>
-          <p>Rol: {perfil.rol}</p>
+        <div className="max-w-4xl mx-auto">
+          {/* HEADER */}
+          <div className="bg-white p-6 rounded-xl shadow mb-6">
+            <h2 className="text-2xl font-bold">
+              Bienvenido {perfil.nombre}
+            </h2>
+            <p className="text-gray-600">{perfil.email}</p>
+            <p className="mt-2">
+              Rol: <span className="font-semibold">{perfil.rol}</span>
+            </p>
+          </div>
 
-          <br />
-
-          {/* 🔥 ADMIN PANEL */}
+          {/* ADMIN PANEL */}
           {perfil.rol === 'admin' && (
-            <>
-              <button onClick={obtenerUsuarios}>
+            <div className="bg-white p-6 rounded-xl shadow">
+              <button
+                onClick={obtenerUsuarios}
+                className="bg-green-600 text-white px-4 py-2 rounded mb-4"
+              >
                 Cargar usuarios
               </button>
 
-              <h4>Usuarios:</h4>
+              <div className="grid gap-4">
+                {usuarios.map((u) => (
+                  <div
+                    key={u.id}
+                    className="border p-4 rounded-lg bg-gray-50"
+                  >
+                    {editandoId === u.id ? (
+                      <>
+                        <input
+                          className="border p-2 w-full mb-2 rounded"
+                          placeholder="Nombre"
+                          value={form.nombre}
+                          onChange={(e) =>
+                            setForm({
+                              ...form,
+                              nombre: e.target.value,
+                            })
+                          }
+                        />
 
-              {usuarios.map((u) => (
-                <div
-                  key={u.id}
-                  style={{
-                    border: '1px solid gray',
-                    padding: 10,
-                    marginBottom: 5,
-                  }}
-                >
-                  {editandoId === u.id ? (
-                    <>
-                      <input
-                        placeholder="Nombre"
-                        value={form.nombre}
-                        onChange={(e) =>
-                          setForm({ ...form, nombre: e.target.value })
-                        }
-                      />
+                        <input
+                          className="border p-2 w-full mb-2 rounded"
+                          placeholder="Institución"
+                          value={form.institucionId}
+                          onChange={(e) =>
+                            setForm({
+                              ...form,
+                              institucionId: e.target.value,
+                            })
+                          }
+                        />
 
-                      <input
-                        placeholder="Institución"
-                        value={form.institucionId}
-                        onChange={(e) =>
-                          setForm({
-                            ...form,
-                            institucionId: e.target.value,
-                          })
-                        }
-                      />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => actualizarUsuario(u.id)}
+                            className="bg-blue-600 text-white px-3 py-1 rounded"
+                          >
+                            Guardar
+                          </button>
 
-                      <br />
+                          <button
+                            onClick={() => setEditandoId(null)}
+                            className="bg-gray-400 text-white px-3 py-1 rounded"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <h4 className="font-bold">{u.nombre}</h4>
+                        <p className="text-sm text-gray-600">
+                          {u.email}
+                        </p>
+                        <p className="text-sm">
+                          Rol: {u.rol}
+                        </p>
 
-                      <button onClick={() => actualizarUsuario(u.id)}>
-                        Guardar
-                      </button>
+                        <div className="flex gap-2 mt-2">
+                          <button
+                            onClick={() => {
+                              setEditandoId(u.id);
+                              setForm({
+                                nombre: u.nombre || '',
+                                institucionId:
+                                  u.institucionId || '',
+                              });
+                            }}
+                            className="bg-yellow-500 text-white px-3 py-1 rounded"
+                          >
+                            Editar
+                          </button>
 
-                      <button onClick={() => setEditandoId(null)}>
-                        Cancelar
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <p><b>{u.nombre}</b></p>
-                      <p>{u.email}</p>
-                      <p>Rol: {u.rol}</p>
-
-                      <button
-                        onClick={() => {
-                          setEditandoId(u.id);
-                          setForm({
-                            nombre: u.nombre || '',
-                            institucionId: u.institucionId || '',
-                          });
-                        }}
-                      >
-                        Editar
-                      </button>
-
-                      <button onClick={() => eliminarUsuario(u.id)}>
-                        Eliminar
-                      </button>
-                    </>
-                  )}
-                </div>
-              ))}
-            </>
+                          <button
+                            onClick={() =>
+                              eliminarUsuario(u.id)
+                            }
+                            className="bg-red-600 text-white px-3 py-1 rounded"
+                          >
+                            Eliminar
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
 
-          <br />
-
-          <button
-            onClick={() =>
-              logout({
-                logoutParams: { returnTo: window.location.origin },
-              })
-            }
-          >
-            Logout
-          </button>
-        </>
+          {/* LOGOUT */}
+          <div className="mt-6 text-center">
+            <button
+              onClick={() =>
+                logout({
+                  logoutParams: {
+                    returnTo: window.location.origin,
+                  },
+                })
+              }
+              className="bg-black text-white px-4 py-2 rounded"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
