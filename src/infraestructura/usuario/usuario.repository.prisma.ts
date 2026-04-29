@@ -20,4 +20,11 @@ export class UsuarioRepositoryPrisma implements UsuarioRepository {
       data,
     });
   }
+
+  async actualizarPorAuth0Id(auth0Id: string, data: any) {
+    return this.prisma.usuario.update({
+      where: { auth0Id },
+      data,
+    });
+  }
 }

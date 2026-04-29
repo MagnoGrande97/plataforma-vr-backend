@@ -9,6 +9,8 @@ import { PrismaService } from '../../infraestructura/database/prisma.service';
 import { UsuarioRepositoryPrisma } from '../../infraestructura/usuario/usuario.repository.prisma';
 import { SincronizarUsuarioUseCase } from '../../aplicacion/usuario/sincronizar-usuario.usecase';
 
+import { Body, Put } from '@nestjs/common';
+
 @Controller('usuarios')
 export class UsuariosController {
   private repo: UsuarioRepositoryPrisma;
@@ -50,5 +52,14 @@ export class UsuariosController {
   @Get('test')
   test() {
     return { ok: true };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('perfil')
+  async actualizarPerfil(
+    @UsuarioActual() usuarioToken,
+    @Body() body: { nombre?: string; institucionId?: string }
+  ) {
+    return this.repo.actualizarPorAuth0Id(usuarioToken.sub, body);
   }
 }

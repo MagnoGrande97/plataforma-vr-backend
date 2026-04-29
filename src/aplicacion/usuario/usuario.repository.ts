@@ -8,4 +8,9 @@ export interface UsuarioRepository {
     email: string;
     nombre: string;
   }): Promise<Usuario>;
+
+  actualizarPorAuth0Id(
+    auth0Id: string,
+    data: { nombre?: string; institucionId?: string }
+  ): Promise<Usuario>;
 }
