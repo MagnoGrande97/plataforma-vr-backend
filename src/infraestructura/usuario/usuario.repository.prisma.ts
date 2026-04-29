@@ -1,5 +1,4 @@
 import { UsuarioRepository } from '../../aplicacion/usuario/usuario.repository';
-import { Usuario } from '../../dominio/usuario/usuario.entity';
 import { PrismaService } from '../database/prisma.service';
 
 export class UsuarioRepositoryPrisma implements UsuarioRepository {
@@ -21,6 +20,7 @@ export class UsuarioRepositoryPrisma implements UsuarioRepository {
     });
   }
 
+  // 🔥 NUEVO
   async actualizarPorAuth0Id(auth0Id: string, data: any) {
     return this.prisma.usuario.update({
       where: { auth0Id },

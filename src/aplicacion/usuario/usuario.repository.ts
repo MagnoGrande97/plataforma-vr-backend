@@ -9,8 +9,12 @@ export interface UsuarioRepository {
     nombre: string;
   }): Promise<Usuario>;
 
+  // 🔥 NUEVO
   actualizarPorAuth0Id(
     auth0Id: string,
-    data: { nombre?: string; institucionId?: string }
+    data: {
+      nombre?: string;
+      institucionId?: string;
+    }
   ): Promise<Usuario>;
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards, Put, Body } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt/jwt-auth.guard';
 import { UsuarioActual } from '../../core/decoradores/usuario.decorador';
 
@@ -8,8 +8,6 @@ import { RolesGuard } from '../../core/guards/roles.guard';
 import { PrismaService } from '../../infraestructura/database/prisma.service';
 import { UsuarioRepositoryPrisma } from '../../infraestructura/usuario/usuario.repository.prisma';
 import { SincronizarUsuarioUseCase } from '../../aplicacion/usuario/sincronizar-usuario.usecase';
-
-import { Body, Put } from '@nestjs/common';
 
 @Controller('usuarios')
 export class UsuariosController {
@@ -33,14 +31,24 @@ export class UsuariosController {
     };
   }
 
-  // 🔹 PERFIL (usuario actual)
+  // 🔹 PERFIL
   @UseGuards(JwtAuthGuard)
   @Get('perfil')
   async perfil(@UsuarioActual() usuarioToken) {
     return this.repo.buscarPorAuth0Id(usuarioToken.sub);
   }
 
-  // 🔥 NUEVA RUTA ADMIN
+  // 🔥 EDITAR PERFIL (LO NUEVO IMPORTANTE)
+  @UseGuards(JwtAuthGuard)
+  @Put('perfil')
+  async actualizarPerfil(
+    @UsuarioActual() usuarioToken,
+    @Body() body: { nombre?: string; institucionId?: string }
+  ) {
+    return this.repo.actualizarPorAuth0Id(usuarioToken.sub, body);
+  }
+
+  // 🔥 ADMIN
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Get('admin')
@@ -52,14 +60,5 @@ export class UsuariosController {
   @Get('test')
   test() {
     return { ok: true };
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Put('perfil')
-  async actualizarPerfil(
-    @UsuarioActual() usuarioToken,
-    @Body() body: { nombre?: string; institucionId?: string }
-  ) {
-    return this.repo.actualizarPorAuth0Id(usuarioToken.sub, body);
   }
 }
