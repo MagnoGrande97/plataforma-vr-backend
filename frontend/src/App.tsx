@@ -6,60 +6,65 @@ function App() {
     loginWithRedirect,
     logout,
     isAuthenticated,
-    user,
     getAccessTokenSilently,
     isLoading,
   } = useAuth0();
 
-  // 🔥 ESTADO DEL PERFIL (DB)
   const [perfil, setPerfil] = useState<any>(null);
+  const [usuarios, setUsuarios] = useState<any[]>([]);
 
-  // 🔥 OBTENER PERFIL DESDE BACKEND
+  // 🔹 PERFIL
   const obtenerPerfil = async () => {
-    try {
-      const token = await getAccessTokenSilently();
+    const token = await getAccessTokenSilently();
 
-      const res = await fetch(
-        'https://prometeo-z6hv.onrender.com/usuarios/perfil',
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+    const res = await fetch(
+      'https://prometeo-z6hv.onrender.com/usuarios/perfil',
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-      const data = await res.json();
-      console.log('PERFIL 👉', data);
-
-      setPerfil(data);
-    } catch (e) {
-      console.error(e);
-    }
+    const data = await res.json();
+    setPerfil(data);
   };
 
-  // 🔥 LLAMAR ENDPOINT ADMIN
+  // 🔹 LISTAR USUARIOS (ADMIN)
   const obtenerUsuarios = async () => {
-    try {
-      const token = await getAccessTokenSilently();
+    const token = await getAccessTokenSilently();
 
-      const res = await fetch(
-        'https://prometeo-z6hv.onrender.com/usuarios/todos',
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+    const res = await fetch(
+      'https://prometeo-z6hv.onrender.com/usuarios/todos',
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-      const data = await res.json();
-      alert(JSON.stringify(data, null, 2));
-    } catch (e) {
-      console.error(e);
-      alert('Error obteniendo usuarios');
-    }
+    const data = await res.json();
+    setUsuarios(data);
   };
 
-  // 🔥 CUANDO SE LOGUEA → TRAER PERFIL
+  // 🔹 ELIMINAR USUARIO
+  const eliminarUsuario = async (id: string) => {
+    const token = await getAccessTokenSilently();
+
+    await fetch(
+      `https://prometeo-z6hv.onrender.com/usuarios/${id}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    // refrescar lista
+    obtenerUsuarios();
+  };
+
   useEffect(() => {
     if (isAuthenticated) {
       obtenerPerfil();
@@ -78,19 +83,43 @@ function App() {
 
       {isAuthenticated && perfil && (
         <>
-          {/* 🔥 DATOS REALES DEL BACKEND */}
           <h3>Bienvenido {perfil.nombre}</h3>
           <p>Email: {perfil.email}</p>
           <p>Rol: {perfil.rol}</p>
 
-          {/* 🔥 SOLO ADMIN VE ESTO */}
+          <br />
+
+          {/* 🔥 ADMIN PANEL */}
           {perfil.rol === 'admin' && (
-            <button onClick={obtenerUsuarios}>
-              Ver usuarios (admin)
-            </button>
+            <>
+              <button onClick={obtenerUsuarios}>
+                Cargar usuarios
+              </button>
+
+              <h4>Usuarios:</h4>
+
+              {usuarios.map((u) => (
+                <div
+                  key={u.id}
+                  style={{
+                    border: '1px solid gray',
+                    padding: 10,
+                    marginBottom: 5,
+                  }}
+                >
+                  <p><b>{u.nombre}</b></p>
+                  <p>{u.email}</p>
+                  <p>Rol: {u.rol}</p>
+
+                  <button onClick={() => eliminarUsuario(u.id)}>
+                    Eliminar
+                  </button>
+                </div>
+              ))}
+            </>
           )}
 
-          <br /><br />
+          <br />
 
           <button
             onClick={() =>
