@@ -54,7 +54,7 @@ export class UsuariosController {
   @Put('perfil')
   async actualizarPerfil(
     @UsuarioActual() usuarioToken,
-    @Body() body: { nombre?: string; institucionId?: string }
+    @Body() body: { nombre?: string }
   ) {
     return this.repo.actualizarPorAuth0Id(usuarioToken.sub, body);
   }
@@ -71,15 +71,22 @@ export class UsuariosController {
   // 🔥 CRUD USUARIOS (ADMIN)
   // =========================
 
-  // 🔹 LISTAR TODOS (CON PAGINACIÓN 🔥)
+  // 🔹 LISTAR SOLO DE SU EMPRESA
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Get('todos')
   async listarUsuarios(
+    @UsuarioActual() usuarioToken,
     @Query('page') page = 1,
     @Query('limit') limit = 10
   ) {
+    const usuario = await this.repo.buscarPorAuth0Id(usuarioToken.sub);
+
     return this.prisma.usuario.findMany({
+      where: {
+        institucionId: usuario?.institucionId,
+        activo: true,
+      },
       skip: (Number(page) - 1) * Number(limit),
       take: Number(limit),
       orderBy: { creadoEn: 'desc' },
@@ -103,14 +110,13 @@ export class UsuariosController {
     @Body()
     body: {
       nombre?: string;
-      institucionId?: string;
       rol?: string;
     }
   ) {
     return this.repo.actualizarPorId(id, body);
   }
 
-  // 🔹 ELIMINAR (soft delete en el siguiente paso)
+  // 🔥 ELIMINAR (SOFT DELETE)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Delete(':id')

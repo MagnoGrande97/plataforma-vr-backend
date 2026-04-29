@@ -12,6 +12,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Institucion {
+  id        String   @id @default(uuid())
+  nombre    String
+  creadoEn  DateTime @default(now())
+
+  usuarios  Usuario[]
+}
+
 model Usuario {
   id            String   @id @default(uuid())
   auth0Id       String   @unique
@@ -19,6 +27,8 @@ model Usuario {
   nombre        String
   institucionId String?
   rol           String   @default("user")
-  activo        Boolean  @default(true)
   creadoEn      DateTime @default(now())
+  activo        Boolean  @default(true)
+
+  institucion   Institucion? @relation(fields: [institucionId], references: [id])
 }

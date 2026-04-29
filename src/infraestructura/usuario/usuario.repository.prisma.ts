@@ -14,6 +14,7 @@ export class UsuarioRepositoryPrisma implements UsuarioRepository {
     auth0Id: string;
     email: string;
     nombre: string;
+    institucionId?: string;
   }) {
     return this.prisma.usuario.create({
       data,
@@ -21,23 +22,9 @@ export class UsuarioRepositoryPrisma implements UsuarioRepository {
   }
 
   async actualizarPorAuth0Id(auth0Id: string, data: any) {
-    const usuario = await this.prisma.usuario.findUnique({
-      where: { auth0Id },
-    });
-
-    if (!usuario) {
-      throw new Error('Usuario no existe');
-    }
-
     return this.prisma.usuario.update({
       where: { auth0Id },
       data,
-    });
-  }
-
-  async listarTodos() {
-    return this.prisma.usuario.findMany({
-      orderBy: { creadoEn: 'desc' },
     });
   }
 
@@ -47,24 +34,24 @@ export class UsuarioRepositoryPrisma implements UsuarioRepository {
     });
   }
 
-  async actualizarPorId(
-    id: string,
-    data: {
-      nombre?: string;
-      institucionId?: string;
-      rol?: string;
-    }
-  ) {
+  async actualizarPorId(id: string, data: any) {
     return this.prisma.usuario.update({
       where: { id },
       data,
     });
   }
 
-  // 🔥 FIX AQUÍ
+  // 🔥 SOFT DELETE
   async eliminarPorId(id: string) {
-    return this.prisma.usuario.delete({
+    return this.prisma.usuario.update({
       where: { id },
+      data: { activo: false },
+    });
+  }
+
+  async crearInstitucion(data: { nombre: string }) {
+    return this.prisma.institucion.create({
+      data,
     });
   }
 }
