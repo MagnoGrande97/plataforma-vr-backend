@@ -19,14 +19,19 @@ export class UsuariosController {
   @UseGuards(JwtAuthGuard)
   @Get()
   async obtenerUsuarios(@UsuarioActual() usuarioToken) {
-    console.log('TOKEN DATA: ', usuarioToken);
-
     const usuario = await this.useCase.ejecutar(usuarioToken);
 
     return {
       mensaje: 'Usuario sincronizado',
       usuario,
     };
+  }
+
+  // 🔥 NUEVO ENDPOINT
+  @UseGuards(JwtAuthGuard)
+  @Get('perfil')
+  async perfil(@UsuarioActual() usuarioToken) {
+    return this.repo.buscarPorAuth0Id(usuarioToken.sub);
   }
 
   @Get('test')

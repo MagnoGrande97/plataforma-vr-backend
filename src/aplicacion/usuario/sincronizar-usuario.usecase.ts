@@ -1,28 +1,27 @@
 import { UsuarioRepository } from './usuario.repository';
 import { Usuario } from '../../dominio/usuario/usuario.entity';
-import { randomUUID } from 'crypto';
 
 export class SincronizarUsuarioUseCase {
   constructor(private repo: UsuarioRepository) {}
 
-  async ejecutar(data: any): Promise<Usuario> {
-    // 🔥 Validación crítica
-    if (!data || !data.usuarioId) {
-      throw new Error('Token inválido o vacío');
+  async ejecutar(payload: any): Promise<Usuario> {
+    // 🔥 Validación real del token
+    if (!payload || !payload.sub) {
+      throw new Error('Token inválido');
     }
 
-    let usuario = await this.repo.buscarPorAuth0Id(data.usuarioId);
+    const auth0Id = payload.sub;
+    const email = payload.email ?? '';
+    const nombre = payload.name || payload.nickname || '';
+
+    let usuario = await this.repo.buscarPorAuth0Id(auth0Id);
 
     if (!usuario) {
-      usuario = {
-        id: randomUUID(), // ✅ FIX PRO
-        auth0Id: data.usuarioId,
-        email: data.email ?? '',
-        nombre: data.nombre ?? '',
-        creadoEn: new Date(),
-      };
-
-      await this.repo.crear(usuario);
+      usuario = await this.repo.crear({
+        auth0Id,
+        email,
+        nombre,
+      });
     }
 
     return usuario;
