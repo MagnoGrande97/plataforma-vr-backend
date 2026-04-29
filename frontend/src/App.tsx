@@ -13,6 +13,13 @@ function App() {
   const [perfil, setPerfil] = useState<any>(null);
   const [usuarios, setUsuarios] = useState<any[]>([]);
 
+  // 🔥 NUEVO (EDICIÓN)
+  const [editandoId, setEditandoId] = useState<string | null>(null);
+  const [form, setForm] = useState({
+    nombre: '',
+    institucionId: '',
+  });
+
   // 🔹 PERFIL
   const obtenerPerfil = async () => {
     const token = await getAccessTokenSilently();
@@ -30,7 +37,7 @@ function App() {
     setPerfil(data);
   };
 
-  // 🔹 LISTAR USUARIOS (ADMIN)
+  // 🔹 LISTAR USUARIOS
   const obtenerUsuarios = async () => {
     const token = await getAccessTokenSilently();
 
@@ -47,7 +54,7 @@ function App() {
     setUsuarios(data);
   };
 
-  // 🔹 ELIMINAR USUARIO
+  // 🔹 ELIMINAR
   const eliminarUsuario = async (id: string) => {
     const token = await getAccessTokenSilently();
 
@@ -61,7 +68,26 @@ function App() {
       }
     );
 
-    // refrescar lista
+    obtenerUsuarios();
+  };
+
+  // 🔥 ACTUALIZAR USUARIO
+  const actualizarUsuario = async (id: string) => {
+    const token = await getAccessTokenSilently();
+
+    await fetch(
+      `https://prometeo-z6hv.onrender.com/usuarios/${id}`,
+      {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      }
+    );
+
+    setEditandoId(null);
     obtenerUsuarios();
   };
 
@@ -107,13 +133,60 @@ function App() {
                     marginBottom: 5,
                   }}
                 >
-                  <p><b>{u.nombre}</b></p>
-                  <p>{u.email}</p>
-                  <p>Rol: {u.rol}</p>
+                  {editandoId === u.id ? (
+                    <>
+                      <input
+                        placeholder="Nombre"
+                        value={form.nombre}
+                        onChange={(e) =>
+                          setForm({ ...form, nombre: e.target.value })
+                        }
+                      />
 
-                  <button onClick={() => eliminarUsuario(u.id)}>
-                    Eliminar
-                  </button>
+                      <input
+                        placeholder="Institución"
+                        value={form.institucionId}
+                        onChange={(e) =>
+                          setForm({
+                            ...form,
+                            institucionId: e.target.value,
+                          })
+                        }
+                      />
+
+                      <br />
+
+                      <button onClick={() => actualizarUsuario(u.id)}>
+                        Guardar
+                      </button>
+
+                      <button onClick={() => setEditandoId(null)}>
+                        Cancelar
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <p><b>{u.nombre}</b></p>
+                      <p>{u.email}</p>
+                      <p>Rol: {u.rol}</p>
+
+                      <button
+                        onClick={() => {
+                          setEditandoId(u.id);
+                          setForm({
+                            nombre: u.nombre || '',
+                            institucionId: u.institucionId || '',
+                          });
+                        }}
+                      >
+                        Editar
+                      </button>
+
+                      <button onClick={() => eliminarUsuario(u.id)}>
+                        Eliminar
+                      </button>
+                    </>
+                  )}
                 </div>
               ))}
             </>
