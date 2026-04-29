@@ -5,5 +5,6 @@ export class Usuario {
   nombre: string;
   institucionId?: string | null;
   rol?: string | null;
+  activo?: boolean; // 🔥 IMPORTANTE
   creadoEn: Date;
 }
