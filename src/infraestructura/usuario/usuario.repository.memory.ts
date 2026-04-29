@@ -8,6 +8,10 @@ export class UsuarioRepositoryMemory implements UsuarioRepository {
     return this.usuarios.find(u => u.auth0Id === auth0Id) || null;
   }
 
+  async crearInstitucion(data: { nombre: string }): Promise<any> {
+    return { id: 'memory-institucion' };
+  }
+
   async crear(data: {
     auth0Id: string;
     email: string;
@@ -26,18 +30,33 @@ export class UsuarioRepositoryMemory implements UsuarioRepository {
 
   async actualizarPorAuth0Id(
     auth0Id: string,
-    data: { nombre?: string; institucionId?: string }
+    data: { nombre?: string }
   ): Promise<Usuario> {
     const usuario = this.usuarios.find(u => u.auth0Id === auth0Id);
-
-    if (!usuario) {
-      throw new Error('Usuario no encontrado');
-    }
+    if (!usuario) throw new Error('Usuario no encontrado');
 
     if (data.nombre !== undefined) usuario.nombre = data.nombre;
-    if (data.institucionId !== undefined)
-      usuario.institucionId = data.institucionId;
 
+    return usuario;
+  }
+
+  async buscarPorId(id: string): Promise<Usuario | null> {
+    return this.usuarios.find(u => u.id === id) || null;
+  }
+
+  async actualizarPorId(id: string, data: any): Promise<Usuario> {
+    const usuario = this.usuarios.find(u => u.id === id);
+    if (!usuario) throw new Error('Usuario no encontrado');
+
+    Object.assign(usuario, data);
+    return usuario;
+  }
+
+  async eliminarPorId(id: string): Promise<Usuario> {
+    const usuario = this.usuarios.find(u => u.id === id);
+    if (!usuario) throw new Error('Usuario no encontrado');
+
+    usuario.activo = false;
     return usuario;
   }
 }

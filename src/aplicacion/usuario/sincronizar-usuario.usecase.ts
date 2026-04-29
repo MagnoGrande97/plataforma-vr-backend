@@ -20,23 +20,16 @@ export class SincronizarUsuarioUseCase {
         nombre: email ?? 'Empresa',
       });
 
-      usuario = {
-        id: randomUUID(),
-        auth0Id: data.sub,
-        email: email ?? '',
-        nombre: nombre ?? email ?? '',
-        institucionId: institucion.id,
-        creadoEn: new Date(),
-      };
-
       await this.repo.crear({
         auth0Id: data.sub,
         email: email ?? '',
         nombre: nombre ?? email ?? '',
         institucionId: institucion.id,
       });
+
+      usuario = await this.repo.buscarPorAuth0Id(data.sub);
     }
 
-    return usuario;
+    return usuario!;
   }
 }

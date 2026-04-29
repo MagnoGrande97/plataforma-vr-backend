@@ -84,7 +84,7 @@ export class UsuariosController {
 
     return this.prisma.usuario.findMany({
       where: {
-        institucionId: usuario?.institucionId,
+        institucionId: usuario?.institucionId ?? undefined,
         activo: true,
       },
       skip: (Number(page) - 1) * Number(limit),
