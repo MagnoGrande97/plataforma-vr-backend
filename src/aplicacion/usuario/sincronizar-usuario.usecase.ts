@@ -29,7 +29,12 @@ export class SincronizarUsuarioUseCase {
         creadoEn: new Date(),
       };
 
-      await this.repo.crear(usuario);
+      await this.repo.crear({
+        auth0Id: data.sub,
+        email: email ?? '',
+        nombre: nombre ?? email ?? '',
+        institucionId: institucion.id,
+      });
     }
 
     return usuario;

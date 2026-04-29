@@ -8,7 +8,18 @@ export class UsuarioRepositoryMemory implements UsuarioRepository {
     return this.usuarios.find(u => u.auth0Id === auth0Id) || null;
   }
 
-  async crear(usuario: Usuario): Promise<Usuario> {
+  async crear(data: {
+    auth0Id: string;
+    email: string;
+    nombre: string;
+    institucionId?: string;
+  }): Promise<Usuario> {
+    const usuario: Usuario = {
+      id: Date.now().toString(),
+      creadoEn: new Date(),
+      ...data,
+    };
+
     this.usuarios.push(usuario);
     return usuario;
   }
