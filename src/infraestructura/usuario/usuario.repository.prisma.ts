@@ -20,8 +20,15 @@ export class UsuarioRepositoryPrisma implements UsuarioRepository {
     });
   }
 
-  // 🔥 NUEVO
   async actualizarPorAuth0Id(auth0Id: string, data: any) {
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { auth0Id },
+    });
+
+    if (!usuario) {
+      throw new Error('Usuario no existe');
+    }
+
     return this.prisma.usuario.update({
       where: { auth0Id },
       data,
