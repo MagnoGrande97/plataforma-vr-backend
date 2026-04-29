@@ -12,4 +12,15 @@ export class UsuarioRepositoryMemory implements UsuarioRepository {
     this.usuarios.push(usuario);
     return usuario;
   }
+
+  async actualizarPorAuth0Id(auth0Id: string, data: any) {
+    const usuario = this.usuarios.find(u => u.auth0Id === auth0Id);
+
+    if (!usuario) return null;
+
+    if (data.nombre !== undefined) usuario.nombre = data.nombre;
+    if (data.institucionId !== undefined) usuario.institucionId = data.institucionId;
+
+    return usuario;
+  }
 }
