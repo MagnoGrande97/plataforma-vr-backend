@@ -26,26 +26,34 @@ function App() {
 
   // 🔥 PERFIL SEGURO
   const obtenerPerfil = async () => {
-    try {
-      const token = await getAccessTokenSilently();
+  try {
+    const token = await getAccessTokenSilently();
 
-      const res = await fetch(
-        'https://prometeo-z6hv.onrender.com/usuarios/perfil',
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+    const res = await fetch(
+      'https://prometeo-z6hv.onrender.com/usuarios/perfil',
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-      if (!res.ok) throw new Error('Error perfil');
+    // 🔥 DEBUG
+    console.log('STATUS PERFIL:', res.status);
 
-      const data = await res.json();
-      setPerfil(data);
-    } catch (e) {
-      console.error('ERROR PERFIL', e);
+    if (!res.ok) {
+      const text = await res.text();
+      console.error('ERROR BACKEND:', text);
+      return;
     }
-  };
+
+    const data = await res.json();
+    setPerfil(data);
+
+  } catch (e) {
+    console.error('ERROR PERFIL', e);
+  }
+};
 
   const obtenerUsuarios = async () => {
     try {
