@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Delete,
+  Post,
   Query,
 } from '@nestjs/common';
 
@@ -30,7 +31,10 @@ export class UsuariosController {
     this.useCase = new SincronizarUsuarioUseCase(this.repo);
   }
 
-  // 🔹 LOGIN + SINCRONIZA USUARIO
+  // =========================
+  // 🔹 AUTH / PERFIL
+  // =========================
+
   @UseGuards(JwtAuthGuard)
   @Get()
   async obtenerUsuarios(@UsuarioActual() usuarioToken) {
@@ -42,14 +46,12 @@ export class UsuariosController {
     };
   }
 
-  // 🔹 PERFIL
   @UseGuards(JwtAuthGuard)
   @Get('perfil')
   async perfil(@UsuarioActual() usuarioToken) {
     return this.repo.buscarPorAuth0Id(usuarioToken.sub);
   }
 
-  // 🔹 EDITAR PERFIL
   @UseGuards(JwtAuthGuard)
   @Put('perfil')
   async actualizarPerfil(
@@ -59,7 +61,10 @@ export class UsuariosController {
     return this.repo.actualizarPorAuth0Id(usuarioToken.sub, body);
   }
 
-  // 🔥 ADMIN TEST
+  // =========================
+  // 🔥 ADMIN
+  // =========================
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Get('admin')
@@ -68,10 +73,9 @@ export class UsuariosController {
   }
 
   // =========================
-  // 🔥 CRUD USUARIOS (ADMIN)
+  // 🔥 CRUD USUARIOS
   // =========================
 
-  // 🔹 LISTAR SOLO DE SU EMPRESA
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Get('todos')
@@ -93,7 +97,6 @@ export class UsuariosController {
     });
   }
 
-  // 🔹 VER UNO
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Get(':id')
@@ -101,7 +104,6 @@ export class UsuariosController {
     return this.repo.buscarPorId(id);
   }
 
-  // 🔹 ACTUALIZAR
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Patch(':id')
@@ -116,7 +118,6 @@ export class UsuariosController {
     return this.repo.actualizarPorId(id, body);
   }
 
-  // 🔥 ELIMINAR (SOFT DELETE)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Delete(':id')
@@ -124,7 +125,30 @@ export class UsuariosController {
     return this.repo.eliminarPorId(id);
   }
 
+  // =========================
+  // 🔥 INVITAR USUARIO
+  // =========================
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Post('invitar')
+  async invitarUsuario(
+    @UsuarioActual() usuarioToken,
+    @Body() body: { email: string; nombre: string }
+  ) {
+    const admin = await this.repo.buscarPorAuth0Id(usuarioToken.sub);
+
+    return this.repo.crearPorAdmin({
+      email: body.email,
+      nombre: body.nombre,
+      institucionId: admin!.institucionId!,
+    });
+  }
+
+  // =========================
   // 🔹 TEST
+  // =========================
+
   @Get('test')
   test() {
     return { ok: true };

@@ -13,14 +13,23 @@ function App() {
   const [perfil, setPerfil] = useState<any>(null);
   const [usuarios, setUsuarios] = useState<any[]>([]);
 
-  // 🔥 NUEVO (EDICIÓN)
+  // 🔥 EDICIÓN
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [form, setForm] = useState({
     nombre: '',
     institucionId: '',
   });
 
+  // 🔥 INVITAR
+  const [nuevoUsuario, setNuevoUsuario] = useState({
+    email: '',
+    nombre: '',
+  });
+
+  // =========================
   // 🔹 PERFIL
+  // =========================
+
   const obtenerPerfil = async () => {
     const token = await getAccessTokenSilently();
 
@@ -37,7 +46,10 @@ function App() {
     setPerfil(data);
   };
 
+  // =========================
   // 🔹 LISTAR USUARIOS
+  // =========================
+
   const obtenerUsuarios = async () => {
     const token = await getAccessTokenSilently();
 
@@ -54,7 +66,10 @@ function App() {
     setUsuarios(data);
   };
 
+  // =========================
   // 🔹 ELIMINAR
+  // =========================
+
   const eliminarUsuario = async (id: string) => {
     const token = await getAccessTokenSilently();
 
@@ -71,7 +86,10 @@ function App() {
     obtenerUsuarios();
   };
 
-  // 🔥 ACTUALIZAR USUARIO
+  // =========================
+  // 🔹 ACTUALIZAR
+  // =========================
+
   const actualizarUsuario = async (id: string) => {
     const token = await getAccessTokenSilently();
 
@@ -90,6 +108,36 @@ function App() {
     setEditandoId(null);
     obtenerUsuarios();
   };
+
+  // =========================
+  // 🔥 INVITAR USUARIO
+  // =========================
+
+  const invitarUsuario = async () => {
+    try {
+      const token = await getAccessTokenSilently();
+
+      await fetch(
+        'https://prometeo-z6hv.onrender.com/usuarios/invitar',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(nuevoUsuario),
+        }
+      );
+
+      setNuevoUsuario({ email: '', nombre: '' });
+      obtenerUsuarios();
+    } catch (e) {
+      console.error(e);
+      alert('Error invitando usuario');
+    }
+  };
+
+  // =========================
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -128,6 +176,45 @@ function App() {
           {/* ADMIN PANEL */}
           {perfil.rol === 'admin' && (
             <div className="bg-white p-6 rounded-xl shadow">
+              {/* 🔥 INVITAR */}
+              <div className="mb-6">
+                <h4 className="font-bold mb-2">Invitar usuario</h4>
+
+                <div className="flex gap-2">
+                  <input
+                    className="border p-2 rounded w-full"
+                    placeholder="Email"
+                    value={nuevoUsuario.email}
+                    onChange={(e) =>
+                      setNuevoUsuario({
+                        ...nuevoUsuario,
+                        email: e.target.value,
+                      })
+                    }
+                  />
+
+                  <input
+                    className="border p-2 rounded w-full"
+                    placeholder="Nombre"
+                    value={nuevoUsuario.nombre}
+                    onChange={(e) =>
+                      setNuevoUsuario({
+                        ...nuevoUsuario,
+                        nombre: e.target.value,
+                      })
+                    }
+                  />
+
+                  <button
+                    onClick={invitarUsuario}
+                    className="bg-blue-600 text-white px-4 rounded"
+                  >
+                    Invitar
+                  </button>
+                </div>
+              </div>
+
+              {/* LISTAR */}
               <button
                 onClick={obtenerUsuarios}
                 className="bg-green-600 text-white px-4 py-2 rounded mb-4"
@@ -189,9 +276,7 @@ function App() {
                         <p className="text-sm text-gray-600">
                           {u.email}
                         </p>
-                        <p className="text-sm">
-                          Rol: {u.rol}
-                        </p>
+                        <p className="text-sm">Rol: {u.rol}</p>
 
                         <div className="flex gap-2 mt-2">
                           <button
