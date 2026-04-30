@@ -49,7 +49,15 @@ export class UsuariosController {
   @UseGuards(JwtAuthGuard)
   @Get('perfil')
   async perfil(@UsuarioActual() usuarioToken) {
-    return this.repo.buscarPorAuth0Id(usuarioToken.sub);
+    const usuario = await this.repo.buscarPorAuth0Id(usuarioToken.sub);
+
+    // 🔥 SI NO EXISTE → LO CREA
+    if (!usuario) {
+      const nuevo = await this.useCase.ejecutar(usuarioToken);
+      return nuevo;
+    }
+
+    return usuario;
   }
 
   @UseGuards(JwtAuthGuard)
