@@ -10,8 +10,8 @@ export class SincronizarUsuarioUseCase {
       throw new Error('Token inválido');
     }
 
-    const email = data['https://prometeo.com/email'];
-    const nombre = data['https://prometeo.com/name'];
+    const email = data['https://prometeo.com/email'] ?? '';
+    const nombre = data['https://prometeo.com/name'] ?? email;
 
     let usuario = await this.repo.buscarPorAuth0Id(data.sub);
 
