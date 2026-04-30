@@ -16,7 +16,6 @@ function App() {
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [form, setForm] = useState({
     nombre: '',
-    institucionId: '',
   });
 
   const [nuevoUsuario, setNuevoUsuario] = useState({
@@ -24,43 +23,16 @@ function App() {
     nombre: '',
   });
 
-  // 🔥 PERFIL SEGURO
+  // =========================
+  // 🔹 PERFIL
+  // =========================
+
   const obtenerPerfil = async () => {
-  try {
-    const token = await getAccessTokenSilently();
-
-    const res = await fetch(
-      'https://prometeo-z6hv.onrender.com/usuarios/perfil',
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    // 🔥 DEBUG
-    console.log('STATUS PERFIL:', res.status);
-
-    if (!res.ok) {
-      const text = await res.text();
-      console.error('ERROR BACKEND:', text);
-      return;
-    }
-
-    const data = await res.json();
-    setPerfil(data);
-
-  } catch (e) {
-    console.error('ERROR PERFIL', e);
-  }
-};
-
-  const obtenerUsuarios = async () => {
     try {
       const token = await getAccessTokenSilently();
 
       const res = await fetch(
-        'https://prometeo-z6hv.onrender.com/usuarios/todos',
+        'https://prometeo-z6hv.onrender.com/usuarios/perfil',
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -68,14 +40,40 @@ function App() {
         }
       );
 
-      if (!res.ok) throw new Error('Error usuarios');
+      if (!res.ok) throw new Error('Error perfil');
 
       const data = await res.json();
-      setUsuarios(data);
+      console.log('PERFIL 👉', data);
+
+      setPerfil(data);
     } catch (e) {
       console.error(e);
     }
   };
+
+  // =========================
+  // 🔹 USUARIOS
+  // =========================
+
+  const obtenerUsuarios = async () => {
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch(
+      'https://prometeo-z6hv.onrender.com/usuarios/todos',
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await res.json();
+    setUsuarios(data);
+  };
+
+  // =========================
+  // 🔹 ELIMINAR
+  // =========================
 
   const eliminarUsuario = async (id: string) => {
     const token = await getAccessTokenSilently();
@@ -92,6 +90,10 @@ function App() {
 
     obtenerUsuarios();
   };
+
+  // =========================
+  // 🔹 ACTUALIZAR
+  // =========================
 
   const actualizarUsuario = async (id: string) => {
     const token = await getAccessTokenSilently();
@@ -112,28 +114,30 @@ function App() {
     obtenerUsuarios();
   };
 
+  // =========================
+  // 🔥 INVITAR
+  // =========================
+
   const invitarUsuario = async () => {
-    try {
-      const token = await getAccessTokenSilently();
+    const token = await getAccessTokenSilently();
 
-      await fetch(
-        'https://prometeo-z6hv.onrender.com/usuarios/invitar',
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(nuevoUsuario),
-        }
-      );
+    await fetch(
+      'https://prometeo-z6hv.onrender.com/usuarios/invitar',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(nuevoUsuario),
+      }
+    );
 
-      setNuevoUsuario({ email: '', nombre: '' });
-      obtenerUsuarios();
-    } catch (e) {
-      console.error(e);
-    }
+    setNuevoUsuario({ email: '', nombre: '' });
+    obtenerUsuarios();
   };
+
+  // =========================
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -144,7 +148,7 @@ function App() {
   if (isLoading) return <p>Cargando...</p>;
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div style={{ padding: 20 }}>
       {!isAuthenticated && (
         <button onClick={() => loginWithRedirect()}>
           Login
@@ -152,16 +156,22 @@ function App() {
       )}
 
       {isAuthenticated && perfil && (
-        <div>
-          <h3>{perfil.nombre}</h3>
-          <p>{perfil.email}</p>
+        <>
+          {/* 🔥 PERFIL */}
+          <h2>Bienvenido {perfil.nombre}</h2>
+          <p>Email: {perfil.email}</p>
+          <p>Rol: {perfil.rol}</p>
 
+          <hr />
+
+          {/* 🔥 ADMIN PANEL */}
           {perfil.rol === 'admin' && (
             <>
-              <h4>Invitar</h4>
+              <h3>Panel Admin</h3>
 
+              {/* INVITAR */}
               <input
-                placeholder="email"
+                placeholder="Email"
                 value={nuevoUsuario.email}
                 onChange={(e) =>
                   setNuevoUsuario({
@@ -172,7 +182,7 @@ function App() {
               />
 
               <input
-                placeholder="nombre"
+                placeholder="Nombre"
                 value={nuevoUsuario.nombre}
                 onChange={(e) =>
                   setNuevoUsuario({
@@ -186,10 +196,13 @@ function App() {
                 Invitar
               </button>
 
+              <br /><br />
+
               <button onClick={obtenerUsuarios}>
                 Cargar usuarios
               </button>
 
+              {/* LISTA */}
               {usuarios.map((u) => (
                 <div key={u.id}>
                   {editandoId === u.id ? (
@@ -198,7 +211,6 @@ function App() {
                         value={form.nombre}
                         onChange={(e) =>
                           setForm({
-                            ...form,
                             nombre: e.target.value,
                           })
                         }
@@ -212,14 +224,13 @@ function App() {
                     <>
                       <p>{u.nombre}</p>
                       <p>{u.email}</p>
+                      <p>Rol: {u.rol}</p>
 
                       <button
                         onClick={() => {
                           setEditandoId(u.id);
                           setForm({
                             nombre: u.nombre || '',
-                            institucionId:
-                              u.institucionId || '',
                           });
                         }}
                       >
@@ -236,10 +247,12 @@ function App() {
             </>
           )}
 
+          <br />
+
           <button onClick={() => logout()}>
             Logout
           </button>
-        </div>
+        </>
       )}
     </div>
   );
