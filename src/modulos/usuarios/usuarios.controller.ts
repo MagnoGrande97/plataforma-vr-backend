@@ -135,7 +135,7 @@ export class UsuariosController {
   // 🔥 INVITAR USUARIO + EMAIL
   // =========================
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @@UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Post('invitar')
   async invitarUsuario(
@@ -143,19 +143,34 @@ export class UsuariosController {
     @Body() body: { email: string; nombre: string }
   ) {
     try {
+      console.log('👉 INVITAR BODY:', body);
+
       const admin = await this.repo.buscarPorAuth0Id(usuarioToken.sub);
 
       if (!admin) {
         throw new Error('Admin no encontrado');
       }
 
+      if (!admin.institucionId) {
+        throw new Error('Admin sin institución');
+      }
+
+      // 🔥 evitar duplicados
+      const existente = await this.repo.buscarPorEmail(body.email);
+      if (existente) {
+        return {
+          mensaje: 'Usuario ya existe',
+          usuario: existente,
+        };
+      }
+
       const usuario = await this.repo.crearPorAdmin({
         email: body.email,
         nombre: body.nombre,
-        institucionId: admin.institucionId!,
+        institucionId: admin.institucionId,
       });
 
-      // 🔥 EMAIL SIN ROMPER
+      // 🔥 EMAIL (no rompe backend)
       try {
         await this.emailService.enviarInvitacion(
           body.email,
@@ -168,7 +183,7 @@ export class UsuariosController {
       return usuario;
 
     } catch (error) {
-      console.error('ERROR INVITAR:', error);
+      console.error('🔥 ERROR INVITAR:', error);
       throw error;
     }
   }
