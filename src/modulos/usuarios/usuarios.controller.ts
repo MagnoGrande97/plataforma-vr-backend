@@ -21,14 +21,22 @@ import { PrismaService } from '../../infraestructura/database/prisma.service';
 import { UsuarioRepositoryPrisma } from '../../infraestructura/usuario/usuario.repository.prisma';
 import { SincronizarUsuarioUseCase } from '../../aplicacion/usuario/sincronizar-usuario.usecase';
 
+// 🔥 IMPORT EMAIL SERVICE
+import { EmailService } from '../../infraestructura/email/email.service';
+
 @Controller('usuarios')
 export class UsuariosController {
   private repo: UsuarioRepositoryPrisma;
   private useCase: SincronizarUsuarioUseCase;
 
+  // 🔥 EMAIL SERVICE
+  private emailService: EmailService;
+
   constructor(private prisma: PrismaService) {
     this.repo = new UsuarioRepositoryPrisma(this.prisma);
     this.useCase = new SincronizarUsuarioUseCase(this.repo);
+
+    this.emailService = new EmailService();
   }
 
   // =========================
@@ -51,10 +59,8 @@ export class UsuariosController {
   async perfil(@UsuarioActual() usuarioToken) {
     const usuario = await this.repo.buscarPorAuth0Id(usuarioToken.sub);
 
-    // 🔥 SI NO EXISTE → LO CREA
     if (!usuario) {
-      const nuevo = await this.useCase.ejecutar(usuarioToken);
-      return nuevo;
+      return this.useCase.ejecutar(usuarioToken);
     }
 
     return usuario;
@@ -134,7 +140,7 @@ export class UsuariosController {
   }
 
   // =========================
-  // 🔥 INVITAR USUARIO
+  // 🔥 INVITAR USUARIO + EMAIL
   // =========================
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -146,11 +152,19 @@ export class UsuariosController {
   ) {
     const admin = await this.repo.buscarPorAuth0Id(usuarioToken.sub);
 
-    return this.repo.crearPorAdmin({
+    const usuario = await this.repo.crearPorAdmin({
       email: body.email,
       nombre: body.nombre,
       institucionId: admin!.institucionId!,
     });
+
+    // 🔥 ENVIAR EMAIL
+    await this.emailService.enviarInvitacion(
+      body.email,
+      body.nombre
+    );
+
+    return usuario;
   }
 
   // =========================
