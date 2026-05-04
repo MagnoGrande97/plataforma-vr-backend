@@ -1,6 +1,5 @@
 import { UsuarioRepository } from './usuario.repository';
 import { Usuario } from '../../dominio/usuario/usuario.entity';
-import { randomUUID } from 'crypto';
 
 export class SincronizarUsuarioUseCase {
   constructor(private repo: UsuarioRepository) {}
@@ -13,23 +12,35 @@ export class SincronizarUsuarioUseCase {
     const email = data['https://prometeo.com/email'] ?? '';
     const nombre = data['https://prometeo.com/name'] ?? email;
 
+    // 🔥 1. BUSCAR POR AUTH0
     let usuario = await this.repo.buscarPorAuth0Id(data.sub);
 
-    if (!usuario) {
-      const institucion = await this.repo.crearInstitucion({
-        nombre: email ?? 'Empresa',
-      });
+    if (usuario) return usuario;
 
-      await this.repo.crear({
+    // 🔥 2. BUSCAR POR EMAIL (INVITADO)
+    const usuarioPorEmail = await this.repo.buscarPorEmail(email);
+
+    if (usuarioPorEmail) {
+      // 🔥 LINKEAR CUENTA
+      await this.repo.actualizarPorId(usuarioPorEmail.id, {
         auth0Id: data.sub,
-        email: email ?? '',
-        nombre: nombre ?? email ?? '',
-        institucionId: institucion.id,
       });
 
-      usuario = await this.repo.buscarPorAuth0Id(data.sub);
+      return this.repo.buscarPorId(usuarioPorEmail.id);
     }
 
-    return usuario!;
+    // 🔥 3. CREAR NUEVO
+    const institucion = await this.repo.crearInstitucion({
+      nombre: email || 'Empresa',
+    });
+
+    await this.repo.crear({
+      auth0Id: data.sub,
+      email,
+      nombre,
+      institucionId: institucion.id,
+    });
+
+    return this.repo.buscarPorAuth0Id(data.sub);
   }
 }
