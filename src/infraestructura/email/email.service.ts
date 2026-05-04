@@ -15,21 +15,11 @@ export class EmailService {
     console.log('📧 Enviando email a:', email);
 
     if (!this.resend) {
-        console.warn('❌ No hay API KEY');
-        return;
+      console.warn('❌ No hay API KEY');
+      return;
     }
 
-    const res = await this.resend.emails.send({
-        from: 'onboarding@resend.dev',
-        to: email,
-        subject: 'Invitación a Prometeo',
-        html: `<h2>Hola ${nombre}</h2>`,
-    });
-
-    console.log('📨 RESPUESTA RESEND:', res);
-    }
-
-    await this.resend.emails.send({
+    const response = await this.resend.emails.send({
       from: 'onboarding@resend.dev',
       to: email,
       subject: 'Invitación a Prometeo',
@@ -37,9 +27,11 @@ export class EmailService {
         <h2>Hola ${nombre}</h2>
         <p>Has sido invitado a la plataforma Prometeo.</p>
         <a href="https://prometeo-frontend.onrender.com/">
-          Entrar
+          Entrar a la plataforma
         </a>
       `,
     });
+
+    console.log('📨 RESPUESTA RESEND:', response);
   }
 }
