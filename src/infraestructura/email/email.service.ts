@@ -12,9 +12,21 @@ export class EmailService {
   }
 
   async enviarInvitacion(email: string, nombre: string) {
+    console.log('📧 Enviando email a:', email);
+
     if (!this.resend) {
-      console.warn('Email no enviado (sin API key)');
-      return;
+        console.warn('❌ No hay API KEY');
+        return;
+    }
+
+    const res = await this.resend.emails.send({
+        from: 'onboarding@resend.dev',
+        to: email,
+        subject: 'Invitación a Prometeo',
+        html: `<h2>Hola ${nombre}</h2>`,
+    });
+
+    console.log('📨 RESPUESTA RESEND:', res);
     }
 
     await this.resend.emails.send({
