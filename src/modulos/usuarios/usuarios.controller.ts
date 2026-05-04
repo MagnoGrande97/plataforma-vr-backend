@@ -9,6 +9,7 @@ import {
   Delete,
   Post,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 
 import { JwtAuthGuard } from '../auth/jwt/jwt-auth.guard';
@@ -132,7 +133,7 @@ export class UsuariosController {
   }
 
   // =========================
-  // 🔥 INVITAR USUARIO + EMAIL
+  // 🔥 INVITAR USUARIO (FIX REAL)
   // =========================
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -143,34 +144,26 @@ export class UsuariosController {
     @Body() body: { email: string; nombre: string }
   ) {
     try {
-      console.log('👉 INVITAR BODY:', body);
-
       const admin = await this.repo.buscarPorAuth0Id(usuarioToken.sub);
 
       if (!admin) {
-        throw new Error('Admin no encontrado');
+        throw new BadRequestException('Admin no encontrado');
       }
 
-      if (!admin.institucionId) {
-        throw new Error('Admin sin institución');
-      }
-
-      // 🔥 evitar duplicados
+      // 🔥 VALIDAR DUPLICADO
       const existente = await this.repo.buscarPorEmail(body.email);
+
       if (existente) {
-        return {
-          mensaje: 'Usuario ya existe',
-          usuario: existente,
-        };
+        throw new BadRequestException('El usuario ya existe');
       }
 
       const usuario = await this.repo.crearPorAdmin({
         email: body.email,
         nombre: body.nombre,
-        institucionId: admin.institucionId,
+        institucionId: admin.institucionId!,
       });
 
-      // 🔥 enviar email (no rompe backend)
+      // 🔥 EMAIL (NO ROMPE)
       try {
         await this.emailService.enviarInvitacion(
           body.email,
@@ -182,9 +175,15 @@ export class UsuariosController {
 
       return usuario;
 
-    } catch (error) {
-      console.error('🔥 ERROR INVITAR:', error);
-      throw error;
+    } catch (error: any) {
+      console.error('🔥 ERROR INVITAR REAL:', error);
+
+      // 🔥 MANEJO DE ERRORES LIMPIO
+      if (error.code === 'P2002') {
+        throw new BadRequestException('Email ya registrado');
+      }
+
+      throw new BadRequestException(error.message || 'Error al invitar usuario');
     }
   }
 

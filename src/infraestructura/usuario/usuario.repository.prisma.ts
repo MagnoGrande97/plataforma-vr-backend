@@ -4,10 +4,6 @@ import { PrismaService } from '../database/prisma.service';
 export class UsuarioRepositoryPrisma implements UsuarioRepository {
   constructor(private prisma: PrismaService) {}
 
-  // =========================
-  // 🔹 BUSCAR
-  // =========================
-
   async buscarPorAuth0Id(auth0Id: string) {
     return this.prisma.usuario.findUnique({
       where: { auth0Id },
@@ -26,10 +22,6 @@ export class UsuarioRepositoryPrisma implements UsuarioRepository {
     });
   }
 
-  // =========================
-  // 🔹 CREAR
-  // =========================
-
   async crear(data: {
     auth0Id: string;
     email: string;
@@ -38,10 +30,7 @@ export class UsuarioRepositoryPrisma implements UsuarioRepository {
   }) {
     return this.prisma.usuario.create({
       data: {
-        auth0Id: data.auth0Id,
-        email: data.email,
-        nombre: data.nombre,
-        institucionId: data.institucionId,
+        ...data,
         rol: 'user',
         activo: true,
       },
@@ -65,10 +54,6 @@ export class UsuarioRepositoryPrisma implements UsuarioRepository {
     });
   }
 
-  // =========================
-  // 🔹 ACTUALIZAR
-  // =========================
-
   async actualizarPorAuth0Id(auth0Id: string, data: any) {
     return this.prisma.usuario.update({
       where: { auth0Id },
@@ -83,24 +68,10 @@ export class UsuarioRepositoryPrisma implements UsuarioRepository {
     });
   }
 
-  // =========================
-  // 🔥 DELETE
-  // =========================
-
   async eliminarPorId(id: string) {
     return this.prisma.usuario.update({
       where: { id },
       data: { activo: false },
-    });
-  }
-
-  // =========================
-  // 🔹 INSTITUCIÓN
-  // =========================
-
-  async crearInstitucion(data: { nombre: string }) {
-    return this.prisma.institucion.create({
-      data,
     });
   }
 }
