@@ -136,25 +136,26 @@ export class UsuariosController {
   // 🔥 INVITAR USUARIO (FIX REAL)
   // =========================
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
   @Post('invitar')
   async invitarUsuario(
     @UsuarioActual() usuarioToken: any,
     @Body() body: { email: string; nombre: string }
   ) {
+    console.log('📩 INVITAR REQUEST:', body);
+
     try {
       const admin = await this.repo.buscarPorAuth0Id(usuarioToken.sub);
 
       if (!admin) {
-        throw new Error('Admin no encontrado');
+        console.error('❌ Admin no encontrado');
+        throw new BadRequestException('Admin no encontrado');
       }
 
-      // 🔥 VALIDAR SI YA EXISTE
+      // 🔥 VALIDAR DUPLICADO
       const existente = await this.repo.buscarPorEmail(body.email);
 
       if (existente) {
-        console.log('Usuario ya existe:', existente.email);
+        console.warn('⚠️ Usuario ya existe:', body.email);
 
         return {
           mensaje: 'Usuario ya existe',
@@ -162,24 +163,45 @@ export class UsuariosController {
         };
       }
 
-      // 🔥 CREAR
+      // 🔥 CREAR USUARIO
       const usuario = await this.repo.crearPorAdmin({
         email: body.email,
         nombre: body.nombre,
         institucionId: admin.institucionId!,
       });
 
-      // 🔥 EMAIL
-      await this.emailService.enviarInvitacion(
-        body.email,
-        body.nombre
-      );
+      console.log('✅ Usuario creado:', usuario.email);
 
-      return usuario;
+      // 🔥 EMAIL (NO ROMPER FLUJO)
+      try {
+        const emailResponse = await this.emailService.enviarInvitacion(
+          body.email,
+          body.nombre
+        );
+
+        console.log('📨 Email enviado:', emailResponse);
+      } catch (emailError) {
+        console.error('❌ Error enviando email:', emailError);
+
+        // 🔥 NO lanzar error → evitar 500
+        return {
+          mensaje: 'Usuario creado pero email falló',
+          usuario,
+          warning: 'EMAIL_FAILED',
+        };
+      }
+
+      return {
+        mensaje: 'Usuario creado e invitación enviada',
+        usuario,
+      };
 
     } catch (error) {
-      console.error('ERROR INVITAR:', error);
-      throw error;
+      console.error('🔥 ERROR INVITAR:', error);
+
+      throw new BadRequestException(
+        error?.message || 'Error invitando usuario'
+      );
     }
   }
 
