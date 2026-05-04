@@ -12,6 +12,7 @@ export class EmailService {
   }
 
   async enviarInvitacion(email: string, nombre: string) {
+  try {
     console.log('📧 Enviando email a:', email);
 
     if (!this.resend) {
@@ -26,12 +27,12 @@ export class EmailService {
       html: `
         <h2>Hola ${nombre}</h2>
         <p>Has sido invitado a la plataforma Prometeo.</p>
-        <a href="https://prometeo-frontend.onrender.com/">
-          Entrar a la plataforma
-        </a>
       `,
     });
 
     console.log('📨 RESPUESTA RESEND:', response);
+
+  } catch (error) {
+    console.error('🔥 ERROR RESEND:', error);
   }
 }
