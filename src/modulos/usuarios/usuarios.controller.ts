@@ -147,43 +147,39 @@ export class UsuariosController {
       const admin = await this.repo.buscarPorAuth0Id(usuarioToken.sub);
 
       if (!admin) {
-        throw new BadRequestException('Admin no encontrado');
+        throw new Error('Admin no encontrado');
       }
 
-      // 🔥 VALIDAR DUPLICADO
+      // 🔥 VALIDAR SI YA EXISTE
       const existente = await this.repo.buscarPorEmail(body.email);
 
       if (existente) {
-        throw new BadRequestException('El usuario ya existe');
+        console.log('Usuario ya existe:', existente.email);
+
+        return {
+          mensaje: 'Usuario ya existe',
+          usuario: existente,
+        };
       }
 
+      // 🔥 CREAR
       const usuario = await this.repo.crearPorAdmin({
         email: body.email,
         nombre: body.nombre,
         institucionId: admin.institucionId!,
       });
 
-      // 🔥 EMAIL (NO ROMPE)
-      try {
-        await this.emailService.enviarInvitacion(
-          body.email,
-          body.nombre
-        );
-      } catch (e) {
-        console.error('Error enviando email:', e);
-      }
+      // 🔥 EMAIL
+      await this.emailService.enviarInvitacion(
+        body.email,
+        body.nombre
+      );
 
       return usuario;
 
-    } catch (error: any) {
-      console.error('🔥 ERROR INVITAR REAL:', error);
-
-      // 🔥 MANEJO DE ERRORES LIMPIO
-      if (error.code === 'P2002') {
-        throw new BadRequestException('Email ya registrado');
-      }
-
-      throw new BadRequestException(error.message || 'Error al invitar usuario');
+    } catch (error) {
+      console.error('ERROR INVITAR:', error);
+      throw error;
     }
   }
 
