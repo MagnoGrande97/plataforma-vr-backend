@@ -25,7 +25,6 @@ import { SincronizarUsuarioUseCase } from '../../aplicacion/usuario/sincronizar-
 import { EmailService } from '../../infraestructura/email/email.service';
 
 import { InvitarUsuarioDto } from './dto/invitar-usuario.dto';
-import { BadRequestException } from '@nestjs/common';
 
 @Controller('usuarios')
 export class UsuariosController {
