@@ -12,24 +12,25 @@ export class SincronizarUsuarioUseCase {
     const email = data['https://prometeo.com/email'] ?? '';
     const nombre = data['https://prometeo.com/name'] ?? email;
 
-    // 🔥 1. BUSCAR POR AUTH0
+    // 🔥 1. buscar por auth0
     let usuario = await this.repo.buscarPorAuth0Id(data.sub);
-
     if (usuario) return usuario;
 
-    // 🔥 2. BUSCAR POR EMAIL (INVITADO)
+    // 🔥 2. buscar por email (INVITADO)
     const usuarioPorEmail = await this.repo.buscarPorEmail(email);
 
     if (usuarioPorEmail) {
-      // 🔥 LINKEAR CUENTA
       await this.repo.actualizarPorId(usuarioPorEmail.id, {
         auth0Id: data.sub,
       });
 
-      return this.repo.buscarPorId(usuarioPorEmail.id);
+      const actualizado = await this.repo.buscarPorId(usuarioPorEmail.id);
+      if (!actualizado) throw new Error('Error vinculando usuario');
+
+      return actualizado;
     }
 
-    // 🔥 3. CREAR NUEVO
+    // 🔥 3. crear nuevo usuario
     const institucion = await this.repo.crearInstitucion({
       nombre: email || 'Empresa',
     });
@@ -41,6 +42,9 @@ export class SincronizarUsuarioUseCase {
       institucionId: institucion.id,
     });
 
-    return this.repo.buscarPorAuth0Id(data.sub);
+    const nuevo = await this.repo.buscarPorAuth0Id(data.sub);
+    if (!nuevo) throw new Error('Error creando usuario');
+
+    return nuevo;
   }
 }

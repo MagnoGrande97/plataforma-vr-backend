@@ -20,6 +20,12 @@ export class UsuarioRepositoryPrisma implements UsuarioRepository {
     });
   }
 
+  async buscarPorEmail(email: string) {
+    return this.prisma.usuario.findFirst({
+      where: { email },
+    });
+  }
+
   async buscarPorId(id: string) {
     return this.prisma.usuario.findUnique({
       where: { id },

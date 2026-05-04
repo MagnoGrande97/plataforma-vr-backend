@@ -44,6 +44,10 @@ export class UsuarioRepositoryMemory implements UsuarioRepository {
     return this.usuarios.find(u => u.id === id) || null;
   }
 
+  async buscarPorEmail(email: string): Promise<Usuario | null> {
+    return this.usuarios.find(u => u.email === email) || null;
+  }
+
   async actualizarPorId(id: string, data: any): Promise<Usuario> {
     const usuario = this.usuarios.find(u => u.id === id);
     if (!usuario) throw new Error('Usuario no encontrado');
