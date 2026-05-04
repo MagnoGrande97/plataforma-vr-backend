@@ -1,9 +1,22 @@
 import { Resend } from 'resend';
 
 export class EmailService {
-  private resend = new Resend(process.env.RESEND_API_KEY);
+  private resend: Resend | null = null;
+
+  constructor() {
+    if (process.env.RESEND_API_KEY) {
+      this.resend = new Resend(process.env.RESEND_API_KEY);
+    } else {
+      console.warn('⚠️ RESEND_API_KEY no configurada');
+    }
+  }
 
   async enviarInvitacion(email: string, nombre: string) {
+    if (!this.resend) {
+      console.warn('Email no enviado (sin API key)');
+      return;
+    }
+
     await this.resend.emails.send({
       from: 'onboarding@resend.dev',
       to: email,
@@ -11,9 +24,8 @@ export class EmailService {
       html: `
         <h2>Hola ${nombre}</h2>
         <p>Has sido invitado a la plataforma Prometeo.</p>
-        <p>Haz clic abajo para ingresar:</p>
         <a href="https://prometeo-frontend.onrender.com/">
-          Entrar a la plataforma
+          Entrar
         </a>
       `,
     });
