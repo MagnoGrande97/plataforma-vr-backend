@@ -119,22 +119,37 @@ function App() {
   // =========================
 
   const invitarUsuario = async () => {
-    const token = await getAccessTokenSilently();
+    try {
+      const token = await getAccessTokenSilently();
 
-    await fetch(
-      'https://prometeo-z6hv.onrender.com/usuarios/invitar',
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(nuevoUsuario),
+      const res = await fetch(
+        'https://prometeo-z6hv.onrender.com/usuarios/invitar',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(nuevoUsuario),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error('❌ ERROR BACKEND:', data);
+        alert(data.message || 'Error invitando usuario');
+        return;
       }
-    );
 
-    setNuevoUsuario({ email: '', nombre: '' });
-    obtenerUsuarios();
+      console.log('✅ INVITADO:', data);
+
+      setNuevoUsuario({ email: '', nombre: '' });
+      obtenerUsuarios();
+
+    } catch (e) {
+      console.error('🔥 ERROR FRONT:', e);
+    }
   };
 
   // =========================
