@@ -21,7 +21,7 @@ export class UsuarioRepositoryPrisma implements UsuarioRepository {
   }
 
   async buscarPorEmail(email: string) {
-    return this.prisma.usuario.findFirst({
+    return this.prisma.usuario.findUnique({
       where: { email },
     });
   }
