@@ -14,21 +14,15 @@ export class UsuarioRepositoryPrisma implements UsuarioRepository {
     });
   }
 
-  async buscarPorEmail(email: string) {
-    return this.prisma.usuario.findFirst({
-      where: { email },
-    });
-  }
-
-  async buscarPorEmail(email: string) {
-    return this.prisma.usuario.findFirst({
-      where: { email },
-    });
-  }
-
   async buscarPorId(id: string) {
     return this.prisma.usuario.findUnique({
       where: { id },
+    });
+  }
+
+  async buscarPorEmail(email: string) {
+    return this.prisma.usuario.findFirst({
+      where: { email },
     });
   }
 
@@ -54,7 +48,6 @@ export class UsuarioRepositoryPrisma implements UsuarioRepository {
     });
   }
 
-  // 🔥 CREAR USUARIO DESDE ADMIN (INVITACIÓN)
   async crearPorAdmin(data: {
     email: string;
     nombre: string;
@@ -62,7 +55,7 @@ export class UsuarioRepositoryPrisma implements UsuarioRepository {
   }) {
     return this.prisma.usuario.create({
       data: {
-        auth0Id: 'pendiente', // se vinculará luego
+        auth0Id: 'pendiente',
         email: data.email,
         nombre: data.nombre,
         institucionId: data.institucionId,
@@ -91,7 +84,7 @@ export class UsuarioRepositoryPrisma implements UsuarioRepository {
   }
 
   // =========================
-  // 🔥 SOFT DELETE
+  // 🔥 DELETE
   // =========================
 
   async eliminarPorId(id: string) {
