@@ -135,7 +135,7 @@ export class UsuariosController {
   // 🔥 INVITAR USUARIO + EMAIL
   // =========================
 
-  @@UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Post('invitar')
   async invitarUsuario(
@@ -170,7 +170,7 @@ export class UsuariosController {
         institucionId: admin.institucionId,
       });
 
-      // 🔥 EMAIL (no rompe backend)
+      // 🔥 enviar email (no rompe backend)
       try {
         await this.emailService.enviarInvitacion(
           body.email,
