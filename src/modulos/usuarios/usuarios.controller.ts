@@ -24,6 +24,9 @@ import { SincronizarUsuarioUseCase } from '../../aplicacion/usuario/sincronizar-
 
 import { EmailService } from '../../infraestructura/email/email.service';
 
+import { InvitarUsuarioDto } from './dto/invitar-usuario.dto';
+import { BadRequestException } from '@nestjs/common';
+
 @Controller('usuarios')
 export class UsuariosController {
   private repo: UsuarioRepositoryPrisma;
@@ -137,25 +140,33 @@ export class UsuariosController {
   // =========================
 
   @Post('invitar')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   async invitarUsuario(
     @UsuarioActual() usuarioToken: any,
-    @Body() body: { email: string; nombre: string }
+    @Body() body: InvitarUsuarioDto
   ) {
     console.log('📩 INVITAR REQUEST:', body);
 
     try {
+      // 🔹 ADMIN
       const admin = await this.repo.buscarPorAuth0Id(usuarioToken.sub);
 
+      console.log('👤 ADMIN:', admin);
+
       if (!admin) {
-        console.error('❌ Admin no encontrado');
         throw new BadRequestException('Admin no encontrado');
       }
 
-      // 🔥 VALIDAR DUPLICADO
+      if (!admin.institucionId) {
+        throw new BadRequestException('Admin sin institución');
+      }
+
+      // 🔹 VALIDAR DUPLICADO
       const existente = await this.repo.buscarPorEmail(body.email);
 
       if (existente) {
-        console.warn('⚠️ Usuario ya existe:', body.email);
+        console.warn('⚠️ Usuario ya existe:', existente.email);
 
         return {
           mensaje: 'Usuario ya existe',
@@ -163,27 +174,24 @@ export class UsuariosController {
         };
       }
 
-      // 🔥 CREAR USUARIO
+      // 🔹 CREAR USUARIO
       const usuario = await this.repo.crearPorAdmin({
         email: body.email,
         nombre: body.nombre,
-        institucionId: admin.institucionId!,
+        institucionId: admin.institucionId,
       });
 
-      console.log('✅ Usuario creado:', usuario.email);
+      console.log('✅ Usuario creado:', usuario);
 
-      // 🔥 EMAIL (NO ROMPER FLUJO)
+      // 🔹 EMAIL (NO ROMPER FLUJO)
       try {
-        const emailResponse = await this.emailService.enviarInvitacion(
+        await this.emailService.enviarInvitacion(
           body.email,
           body.nombre
         );
-
-        console.log('📨 Email enviado:', emailResponse);
       } catch (emailError) {
-        console.error('❌ Error enviando email:', emailError);
+        console.error('❌ EMAIL FALLÓ:', emailError);
 
-        // 🔥 NO lanzar error → evitar 500
         return {
           mensaje: 'Usuario creado pero email falló',
           usuario,
@@ -196,7 +204,7 @@ export class UsuariosController {
         usuario,
       };
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('🔥 ERROR INVITAR:', error);
 
       throw new BadRequestException(

@@ -1,25 +1,30 @@
 import { Resend } from 'resend';
 
 export class EmailService {
-  private resend: Resend;
+  private resend: Resend | null = null;
 
   constructor() {
     const apiKey = process.env.RESEND_API_KEY;
 
     if (!apiKey) {
       console.error('❌ RESEND_API_KEY no configurado');
-      throw new Error('Email service no disponible');
+      return;
     }
 
     this.resend = new Resend(apiKey);
   }
 
   async enviarInvitacion(email: string, nombre: string) {
-    console.log('📨 Enviando email a:', email);
+    console.log('📨 Intentando enviar email a:', email);
+
+    if (!this.resend) {
+      console.warn('⚠️ Email deshabilitado (no API key)');
+      return { disabled: true };
+    }
 
     try {
       const response = await this.resend.emails.send({
-        from: 'onboarding@resend.dev', // ⚠️ cambia esto si tienes dominio
+        from: 'onboarding@resend.dev', // ⚠️ cambia si tienes dominio verificado
         to: email,
         subject: 'Invitación a Prometeo',
         html: `
@@ -31,18 +36,13 @@ export class EmailService {
         `,
       });
 
-      console.log('✅ Email OK:', response);
+      console.log('✅ Email enviado:', response);
 
       return response;
 
     } catch (error: any) {
-      console.error('❌ RESEND ERROR FULL:', {
-        message: error?.message,
-        name: error?.name,
-        stack: error?.stack,
-      });
-
-      throw new Error('Fallo envío email');
+      console.error('❌ ERROR RESEND:', error?.message || error);
+      throw new Error('Error enviando email');
     }
   }
 }

@@ -144,11 +144,14 @@ function App() {
 
       console.log('✅ INVITADO:', data);
 
+      alert(data.mensaje);
+
       setNuevoUsuario({ email: '', nombre: '' });
       obtenerUsuarios();
 
     } catch (e) {
       console.error('🔥 ERROR FRONT:', e);
+      alert('Error de red');
     }
   };
 
