@@ -1,6 +1,25 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState } from 'react';
 
+function Invitacion() {
+  const { loginWithRedirect } = useAuth0();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    const email = params.get('email');
+
+    loginWithRedirect({
+      authorizationParams: {
+        screen_hint: 'signup',
+        login_hint: email || undefined,
+      },
+    });
+  }, []);
+
+  return <p>Redirigiendo a registro...</p>;
+}
+
 function App() {
   const {
     loginWithRedirect,
@@ -10,10 +29,18 @@ function App() {
     isLoading,
   } = useAuth0();
 
+  // 🔥 RUTA INVITACIÓN
+  if (window.location.pathname === '/invitacion') {
+    return <Invitacion />;
+  }
+
   const [perfil, setPerfil] = useState<any>(null);
+
   const [usuarios, setUsuarios] = useState<any[]>([]);
 
-  const [editandoId, setEditandoId] = useState<string | null>(null);
+  const [editandoId, setEditandoId] =
+    useState<string | null>(null);
+
   const [form, setForm] = useState({
     nombre: '',
   });
@@ -40,12 +67,16 @@ function App() {
         }
       );
 
-      if (!res.ok) throw new Error('Error perfil');
+      if (!res.ok) {
+        throw new Error('Error perfil');
+      }
 
       const data = await res.json();
+
       console.log('PERFIL 👉', data);
 
       setPerfil(data);
+
     } catch (e) {
       console.error(e);
     }
@@ -68,6 +99,7 @@ function App() {
     );
 
     const data = await res.json();
+
     setUsuarios(data);
   };
 
@@ -111,6 +143,7 @@ function App() {
     );
 
     setEditandoId(null);
+
     obtenerUsuarios();
   };
 
@@ -138,7 +171,9 @@ function App() {
 
       if (!res.ok) {
         console.error('❌ ERROR BACKEND:', data);
-        alert(data.message || 'Error invitando usuario');
+
+        alert(data.message || 'Error invitando');
+
         return;
       }
 
@@ -146,11 +181,16 @@ function App() {
 
       alert(data.mensaje);
 
-      setNuevoUsuario({ email: '', nombre: '' });
+      setNuevoUsuario({
+        email: '',
+        nombre: '',
+      });
+
       obtenerUsuarios();
 
     } catch (e) {
       console.error('🔥 ERROR FRONT:', e);
+
       alert('Error de red');
     }
   };
@@ -163,31 +203,38 @@ function App() {
     }
   }, [isAuthenticated]);
 
-  if (isLoading) return <p>Cargando...</p>;
+  if (isLoading) {
+    return <p>Cargando...</p>;
+  }
 
   return (
     <div style={{ padding: 20 }}>
       {!isAuthenticated && (
-        <button onClick={() => loginWithRedirect()}>
+        <button
+          onClick={() =>
+            loginWithRedirect()
+          }
+        >
           Login
         </button>
       )}
 
       {isAuthenticated && perfil && (
         <>
-          {/* 🔥 PERFIL */}
-          <h2>Bienvenido {perfil.nombre}</h2>
+          <h2>
+            Bienvenido {perfil.nombre}
+          </h2>
+
           <p>Email: {perfil.email}</p>
+
           <p>Rol: {perfil.rol}</p>
 
           <hr />
 
-          {/* 🔥 ADMIN PANEL */}
           {perfil.rol === 'admin' && (
             <>
               <h3>Panel Admin</h3>
 
-              {/* INVITAR */}
               <input
                 placeholder="Email"
                 value={nuevoUsuario.email}
@@ -210,17 +257,21 @@ function App() {
                 }
               />
 
-              <button onClick={invitarUsuario}>
+              <button
+                onClick={invitarUsuario}
+              >
                 Invitar
               </button>
 
-              <br /><br />
+              <br />
+              <br />
 
-              <button onClick={obtenerUsuarios}>
+              <button
+                onClick={obtenerUsuarios}
+              >
                 Cargar usuarios
               </button>
 
-              {/* LISTA */}
               {usuarios.map((u) => (
                 <div key={u.id}>
                   {editandoId === u.id ? (
@@ -229,33 +280,54 @@ function App() {
                         value={form.nombre}
                         onChange={(e) =>
                           setForm({
-                            nombre: e.target.value,
+                            nombre:
+                              e.target.value,
                           })
                         }
                       />
 
-                      <button onClick={() => actualizarUsuario(u.id)}>
+                      <button
+                        onClick={() =>
+                          actualizarUsuario(
+                            u.id
+                          )
+                        }
+                      >
                         Guardar
                       </button>
                     </>
                   ) : (
                     <>
                       <p>{u.nombre}</p>
+
                       <p>{u.email}</p>
-                      <p>Rol: {u.rol}</p>
+
+                      <p>
+                        Rol: {u.rol}
+                      </p>
 
                       <button
                         onClick={() => {
-                          setEditandoId(u.id);
+                          setEditandoId(
+                            u.id
+                          );
+
                           setForm({
-                            nombre: u.nombre || '',
+                            nombre:
+                              u.nombre || '',
                           });
                         }}
                       >
                         Editar
                       </button>
 
-                      <button onClick={() => eliminarUsuario(u.id)}>
+                      <button
+                        onClick={() =>
+                          eliminarUsuario(
+                            u.id
+                          )
+                        }
+                      >
                         Eliminar
                       </button>
                     </>
@@ -267,7 +339,9 @@ function App() {
 
           <br />
 
-          <button onClick={() => logout()}>
+          <button
+            onClick={() => logout()}
+          >
             Logout
           </button>
         </>
