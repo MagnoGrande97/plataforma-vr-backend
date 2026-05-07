@@ -5,19 +5,27 @@ function Invitacion() {
   const { loginWithRedirect } = useAuth0();
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(
+      window.location.search
+    );
 
-    const email = params.get('email');
+    const email =
+      params.get('email') || undefined;
+
+    console.log(
+      '📩 EMAIL INVITACIÓN:',
+      email
+    );
 
     loginWithRedirect({
       authorizationParams: {
         screen_hint: 'signup',
-        login_hint: email || undefined,
+        login_hint: email,
       },
     });
   }, []);
 
-  return <p>Redirigiendo a registro...</p>;
+  return <p>Redirigiendo...</p>;
 }
 
 function App() {
@@ -29,14 +37,22 @@ function App() {
     isLoading,
   } = useAuth0();
 
-  // 🔥 RUTA INVITACIÓN
-  if (window.location.pathname === '/invitacion') {
+  // 🔥 DETECTAR INVITACIÓN
+  const params = new URLSearchParams(
+    window.location.search
+  );
+
+  const invite = params.get('invite');
+
+  if (invite === 'true') {
     return <Invitacion />;
   }
 
-  const [perfil, setPerfil] = useState<any>(null);
+  const [perfil, setPerfil] =
+    useState<any>(null);
 
-  const [usuarios, setUsuarios] = useState<any[]>([]);
+  const [usuarios, setUsuarios] =
+    useState<any[]>([]);
 
   const [editandoId, setEditandoId] =
     useState<string | null>(null);
@@ -45,10 +61,11 @@ function App() {
     nombre: '',
   });
 
-  const [nuevoUsuario, setNuevoUsuario] = useState({
-    email: '',
-    nombre: '',
-  });
+  const [nuevoUsuario, setNuevoUsuario] =
+    useState({
+      email: '',
+      nombre: '',
+    });
 
   // =========================
   // 🔹 PERFIL
@@ -56,7 +73,8 @@ function App() {
 
   const obtenerPerfil = async () => {
     try {
-      const token = await getAccessTokenSilently();
+      const token =
+        await getAccessTokenSilently();
 
       const res = await fetch(
         'https://prometeo-z6hv.onrender.com/usuarios/perfil',
@@ -87,7 +105,8 @@ function App() {
   // =========================
 
   const obtenerUsuarios = async () => {
-    const token = await getAccessTokenSilently();
+    const token =
+      await getAccessTokenSilently();
 
     const res = await fetch(
       'https://prometeo-z6hv.onrender.com/usuarios/todos',
@@ -107,8 +126,11 @@ function App() {
   // 🔹 ELIMINAR
   // =========================
 
-  const eliminarUsuario = async (id: string) => {
-    const token = await getAccessTokenSilently();
+  const eliminarUsuario = async (
+    id: string
+  ) => {
+    const token =
+      await getAccessTokenSilently();
 
     await fetch(
       `https://prometeo-z6hv.onrender.com/usuarios/${id}`,
@@ -127,8 +149,11 @@ function App() {
   // 🔹 ACTUALIZAR
   // =========================
 
-  const actualizarUsuario = async (id: string) => {
-    const token = await getAccessTokenSilently();
+  const actualizarUsuario = async (
+    id: string
+  ) => {
+    const token =
+      await getAccessTokenSilently();
 
     await fetch(
       `https://prometeo-z6hv.onrender.com/usuarios/${id}`,
@@ -136,7 +161,8 @@ function App() {
         method: 'PATCH',
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          'Content-Type':
+            'application/json',
         },
         body: JSON.stringify(form),
       }
@@ -153,7 +179,8 @@ function App() {
 
   const invitarUsuario = async () => {
     try {
-      const token = await getAccessTokenSilently();
+      const token =
+        await getAccessTokenSilently();
 
       const res = await fetch(
         'https://prometeo-z6hv.onrender.com/usuarios/invitar',
@@ -161,23 +188,35 @@ function App() {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            'Content-Type':
+              'application/json',
           },
-          body: JSON.stringify(nuevoUsuario),
+          body: JSON.stringify(
+            nuevoUsuario
+          ),
         }
       );
 
       const data = await res.json();
 
       if (!res.ok) {
-        console.error('❌ ERROR BACKEND:', data);
+        console.error(
+          '❌ ERROR BACKEND:',
+          data
+        );
 
-        alert(data.message || 'Error invitando');
+        alert(
+          data.message ||
+            'Error invitando'
+        );
 
         return;
       }
 
-      console.log('✅ INVITADO:', data);
+      console.log(
+        '✅ INVITADO:',
+        data
+      );
 
       alert(data.mensaje);
 
@@ -189,7 +228,10 @@ function App() {
       obtenerUsuarios();
 
     } catch (e) {
-      console.error('🔥 ERROR FRONT:', e);
+      console.error(
+        '🔥 ERROR FRONT:',
+        e
+      );
 
       alert('Error de red');
     }
@@ -241,7 +283,8 @@ function App() {
                 onChange={(e) =>
                   setNuevoUsuario({
                     ...nuevoUsuario,
-                    email: e.target.value,
+                    email:
+                      e.target.value,
                   })
                 }
               />
@@ -252,13 +295,16 @@ function App() {
                 onChange={(e) =>
                   setNuevoUsuario({
                     ...nuevoUsuario,
-                    nombre: e.target.value,
+                    nombre:
+                      e.target.value,
                   })
                 }
               />
 
               <button
-                onClick={invitarUsuario}
+                onClick={
+                  invitarUsuario
+                }
               >
                 Invitar
               </button>
@@ -267,21 +313,27 @@ function App() {
               <br />
 
               <button
-                onClick={obtenerUsuarios}
+                onClick={
+                  obtenerUsuarios
+                }
               >
                 Cargar usuarios
               </button>
 
               {usuarios.map((u) => (
                 <div key={u.id}>
-                  {editandoId === u.id ? (
+                  {editandoId ===
+                  u.id ? (
                     <>
                       <input
-                        value={form.nombre}
+                        value={
+                          form.nombre
+                        }
                         onChange={(e) =>
                           setForm({
                             nombre:
-                              e.target.value,
+                              e.target
+                                .value,
                           })
                         }
                       />
@@ -314,7 +366,8 @@ function App() {
 
                           setForm({
                             nombre:
-                              u.nombre || '',
+                              u.nombre ||
+                              '',
                           });
                         }}
                       >
@@ -340,7 +393,9 @@ function App() {
           <br />
 
           <button
-            onClick={() => logout()}
+            onClick={() =>
+              logout()
+            }
           >
             Logout
           </button>

@@ -23,14 +23,15 @@ export class EmailService {
     }
 
     try {
-      // 🔥 LINK DE INVITACIÓN
+      // 🔥 URL NUEVA (SIN /invitacion)
       const inviteUrl =
-        `https://prometeo-frontend.onrender.com/invitacion?email=${encodeURIComponent(email)}`;
+        `https://prometeo-frontend.onrender.com/?invite=true&email=${encodeURIComponent(email)}`;
 
       const response = await this.resend.emails.send({
         from: 'onboarding@resend.dev',
         to: email,
         subject: 'Invitación a Prometeo',
+
         html: `
           <div style="font-family: Arial; padding: 20px;">
             <h2>Hola ${nombre}</h2>
